@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     edgeToEdgeEnabled: true,
   },
   plugins: [
-    'expo-router',
+    ['expo-router', { root: 'src' }],
     'expo-sqlite',
     'expo-camera',
     [
