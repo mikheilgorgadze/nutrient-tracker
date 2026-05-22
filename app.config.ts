@@ -50,6 +50,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'nutrienttracker',
   extra: {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? null,
-    eas: { projectId: process.env.EAS_PROJECT_ID ?? '' },
+    eas: { projectId: '1f0c7cbe-1960-458e-a588-bcde1ea7fcef' },
   },
 });
