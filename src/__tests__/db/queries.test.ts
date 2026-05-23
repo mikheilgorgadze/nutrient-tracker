@@ -16,6 +16,7 @@ import {
   deleteDiaryEntry,
   updateDiaryEntryServings,
   getDailyTotals,
+  getRecentFoods,
 } from '@/lib/db/queries/diary';
 import {
   getGoals,
@@ -195,6 +196,55 @@ describe('updateDiaryEntryServings', () => {
       expect.stringContaining('SET servings'),
       expect.arrayContaining([2, 330, 62, 0, 7.2, 'entry_001']),
     );
+  });
+});
+
+describe('getRecentFoods', () => {
+  it('returns empty array when no diary entries exist', () => {
+    const db = createMockDb();
+    db.getAllSync.mockReturnValue([]);
+    const result = getRecentFoods(db as never);
+    expect(result).toEqual([]);
+  });
+
+  it('calls getAllSync with a query joining diary_entries and foods', () => {
+    const db = createMockDb();
+    db.getAllSync.mockReturnValue([mockFood]);
+    getRecentFoods(db as never);
+    expect(db.getAllSync).toHaveBeenCalledWith(
+      expect.stringContaining('diary_entries'),
+      expect.any(Array),
+    );
+  });
+
+  it('passes the limit parameter to the query', () => {
+    const db = createMockDb();
+    db.getAllSync.mockReturnValue([]);
+    getRecentFoods(db as never, 5);
+    expect(db.getAllSync).toHaveBeenCalledWith(
+      expect.any(String),
+      [5],
+    );
+  });
+
+  it('uses default limit of 8 when not specified', () => {
+    const db = createMockDb();
+    db.getAllSync.mockReturnValue([]);
+    getRecentFoods(db as never);
+    expect(db.getAllSync).toHaveBeenCalledWith(
+      expect.any(String),
+      [8],
+    );
+  });
+
+  it('returns foods ordered by most recently used', () => {
+    const db = createMockDb();
+    const food2: typeof mockFood = { ...mockFood, id: 'food_002', name: 'Rice' };
+    // getAllSync returns foods already ordered by the SQL query
+    db.getAllSync.mockReturnValue([food2, mockFood]);
+    const result = getRecentFoods(db as never);
+    expect(result[0].id).toBe('food_002');
+    expect(result[1].id).toBe('food_test_001');
   });
 });
 

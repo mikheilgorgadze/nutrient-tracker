@@ -9,6 +9,7 @@
  * is exercised against real component code.
  */
 import React from 'react';
+import { Keyboard } from 'react-native';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FoodSearchModal } from '@/features/foods/components/FoodSearchModal';
@@ -199,5 +200,21 @@ describe('Food add flow (FoodSearchModal)', () => {
       { wrapper }
     );
     expect(screen.getByLabelText('Create custom food')).toBeTruthy();
+  });
+
+  it('dismisses keyboard when a food result is tapped', async () => {
+    const dismissSpy = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
+
+    render(
+      <FoodSearchModal visible={true} onClose={jest.fn()} initialMealSlot="breakfast" />,
+      { wrapper }
+    );
+
+    fireEvent.changeText(screen.getByLabelText('Search foods'), 'wh');
+    fireEvent.press(screen.getByText('White Bread'));
+
+    expect(dismissSpy).toHaveBeenCalled();
+
+    dismissSpy.mockRestore();
   });
 });

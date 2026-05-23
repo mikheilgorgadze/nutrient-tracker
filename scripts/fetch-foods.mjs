@@ -38,19 +38,21 @@ const DATA_TYPES = ['Foundation', 'SR Legacy', 'Survey (FNDDS)'];
 const PAGE_SIZE = 200;
 const BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
 
-// ─── Nutrient FDC IDs we care about ──────────────────────────────────────────
-const NUTRIENT_KCAL     = [1008];
-const NUTRIENT_PROTEIN  = [1003];
-const NUTRIENT_CARBS    = [1005];
-const NUTRIENT_FAT      = [1004];
-const NUTRIENT_FIBER    = [1079];
-const NUTRIENT_SUGAR    = [2000];
-const NUTRIENT_SODIUM   = [1093];
+// ─── USDA nutrient number strings (the "number" field in API responses) ───────
+// "208" = Energy (standard, used in SR Legacy / FNDDS)
+// "957" = Energy, Atwater General Factors (used in Foundation foods)
+const NUTRIENT_KCAL    = ['208', '957'];
+const NUTRIENT_PROTEIN = ['203'];
+const NUTRIENT_CARBS   = ['205'];
+const NUTRIENT_FAT     = ['204'];
+const NUTRIENT_FIBER   = ['291'];
+const NUTRIENT_SUGAR   = ['269'];
+const NUTRIENT_SODIUM  = ['307'];
 
-function pickNutrient(nutrients, ids) {
-  for (const id of ids) {
-    const n = nutrients.find(n => n.nutrientId === id || n.nutrient?.id === id);
-    if (n) return n.amount ?? n.value ?? null;
+function pickNutrient(nutrients, numbers) {
+  for (const num of numbers) {
+    const n = nutrients.find(n => n.number === String(num));
+    if (n?.amount != null) return n.amount;
   }
   return null;
 }
@@ -87,7 +89,7 @@ function createDb() {
 // ─── Fetch helpers ───────────────────────────────────────────────────────────
 
 async function fetchPage(dataType, pageNumber) {
-  const url = `${BASE_URL}/foods/list?api_key=${API_KEY}&dataType=${encodeURIComponent(dataType)}&pageSize=${PAGE_SIZE}&pageNumber=${pageNumber}&nutrients=1008,1003,1005,1004,1079,2000,1093`;
+  const url = `${BASE_URL}/foods/list?api_key=${API_KEY}&dataType=${encodeURIComponent(dataType)}&pageSize=${PAGE_SIZE}&pageNumber=${pageNumber}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${dataType} page ${pageNumber}`);
   return res.json();

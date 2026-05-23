@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFoodSearch } from '../hooks/useFoodSearch';
+import { useRecentFoods } from '../hooks/useRecentFoods';
 import { SearchResultItem } from './SearchResultItem';
 import { FoodDetailSheet } from './FoodDetailSheet';
 import { CreateFoodModal } from './CreateFoodModal';
@@ -36,6 +37,7 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
   const [createOpen, setCreateOpen] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const { results, isLoading } = useFoodSearch(term);
+  const { data: recentFoods } = useRecentFoods();
   const { addEntry } = useDiaryMutations();
   const { activeMealSlot, activeDate } = useDiaryStore();
   const mealSlot: MealSlot = initialMealSlot ?? activeMealSlot;
@@ -128,7 +130,7 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
               <Text style={styles.createFoodBtnText}>Create "{term}"</Text>
             </TouchableOpacity>
           </View>
-        ) : (
+        ) : term.length >= 2 ? (
           <FlatList
             data={results}
             keyExtractor={item => item.id}
@@ -138,7 +140,18 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.listContent}
           />
-        )}
+        ) : recentFoods.length > 0 ? (
+          <FlatList
+            data={recentFoods}
+            keyExtractor={item => item.id}
+            ListHeaderComponent={<Text style={styles.sectionHeader}>Recent</Text>}
+            renderItem={({ item }) => (
+              <SearchResultItem food={item} onPress={handleSelectFood} />
+            )}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.listContent}
+          />
+        ) : null}
 
       {/* Overlay within the same Modal — avoids nested Modal touch issues */}
       <FoodDetailSheet
@@ -236,5 +249,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: spacing.xxl,
+  },
+  sectionHeader: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

@@ -19,7 +19,7 @@ import type { DiaryEntryWithFood } from '@/lib/db/types';
 export function DiaryScreen() {
   const { activeDate, goToPrevDay, goToNextDay, goToToday, activeMealSlot, setActiveMealSlot } = useDiaryStore();
   const { data, isLoading, error } = useDiary(activeDate);
-  const { removeEntry, updateServings } = useDiaryMutations();
+  const { addEntry, removeEntry, updateServings } = useDiaryMutations();
   const { data: weightData } = useWeightLog(3);
   const { logWeight } = useWeightMutations();
 
@@ -58,6 +58,7 @@ export function DiaryScreen() {
         onPrevDay={goToPrevDay}
         onNextDay={goToNextDay}
         onGoToToday={goToToday}
+        latestWeight={weightData?.rawWeights.at(-1)}
       />
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
@@ -106,6 +107,9 @@ export function DiaryScreen() {
           updateServings.mutate({ entryId, servings, food, mealSlot })
         }
         onDelete={id => removeEntry.mutate(id)}
+        onCopyToToday={activeDate !== today() ? (food, servings, mealSlot) => {
+          addEntry.mutate({ food, servings, date: today(), mealSlot });
+        } : undefined}
       />
 
       <WeightEntrySheet

@@ -29,9 +29,10 @@ interface EditEntrySheetProps {
   onClose: () => void;
   onUpdate: (entryId: string, servings: number, food: DiaryEntryWithFood['food'], mealSlot: MealSlot) => void;
   onDelete: (entryId: string) => void;
+  onCopyToToday?: (food: DiaryEntryWithFood['food'], servings: number, mealSlot: MealSlot) => void;
 }
 
-export function EditEntrySheet({ entry, onClose, onUpdate, onDelete }: EditEntrySheetProps) {
+export function EditEntrySheet({ entry, onClose, onUpdate, onDelete, onCopyToToday }: EditEntrySheetProps) {
   const [servings, setServings] = useState(1);
   const [mealSlot, setMealSlot] = useState<MealSlot>('breakfast');
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -122,6 +123,20 @@ export function EditEntrySheet({ entry, onClose, onUpdate, onDelete }: EditEntry
           >
             <Text style={styles.updateBtnText}>Update Servings</Text>
           </TouchableOpacity>
+
+          {onCopyToToday && (
+            <TouchableOpacity
+              style={styles.copyBtn}
+              onPress={() => {
+                onCopyToToday(entry.food, servings, mealSlot);
+                onClose();
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Copy to today"
+            >
+              <Text style={styles.copyBtnText}>Copy to Today</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={styles.deleteBtn}
@@ -253,6 +268,18 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
+  },
+  copyBtn: {
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  copyBtnText: {
+    color: colors.accent,
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.medium,
   },
   deleteBtn: {
     borderRadius: borderRadius.lg,

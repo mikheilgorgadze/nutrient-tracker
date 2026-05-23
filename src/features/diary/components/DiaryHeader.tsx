@@ -15,6 +15,7 @@ interface DiaryHeaderProps {
   onPrevDay: () => void;
   onNextDay: () => void;
   onGoToToday?: () => void;
+  latestWeight?: number;
 }
 
 function localYesterday(): string {
@@ -30,7 +31,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoToToday }: DiaryHeaderProps) {
+export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoToToday, latestWeight }: DiaryHeaderProps) {
   const insets = useSafeAreaInsets();
   const isToday = date === today();
 
@@ -90,6 +91,13 @@ export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoT
         <MacroStat label="Carbs"   value={totals.carbs_g}   target={targets.carbs_g}   color={colors.carbs} />
         <MacroStat label="Fat"     value={totals.fat_g}     target={targets.fat_g}     color={colors.fat} />
       </View>
+
+      {latestWeight !== undefined && (
+        <View style={styles.weightRow}>
+          <Ionicons name="scale-outline" size={13} color={colors.textTertiary} />
+          <Text style={styles.weightText}>{latestWeight.toFixed(1)} kg</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -157,6 +165,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingHorizontal: spacing.xl,
     marginTop: spacing.md,
+  },
+  weightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  weightText: {
+    color: colors.textTertiary,
+    fontSize: fontSize.xs,
+    fontVariant: ['tabular-nums'],
   },
   stat: {
     alignItems: 'center',

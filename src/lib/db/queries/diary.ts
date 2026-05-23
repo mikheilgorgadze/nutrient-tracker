@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { DiaryEntryRow, DiaryEntryWithFood, MacroTotals, MealSlot } from '../types';
+import type { DiaryEntryRow, DiaryEntryWithFood, FoodRow, MacroTotals, MealSlot } from '../types';
 
 // ─── Reads ────────────────────────────────────────────────────────────────────
 
@@ -91,6 +91,22 @@ export function getDailyTotals(db: SQLiteDatabase, date: string): MacroTotals {
     [date],
   );
   return row ?? { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+}
+
+export function getRecentFoods(db: SQLiteDatabase, limit = 8): FoodRow[] {
+  return db.getAllSync<FoodRow>(
+    `SELECT f.*
+     FROM foods f
+     INNER JOIN (
+       SELECT food_id, MAX(created_at) AS last_used
+       FROM diary_entries
+       GROUP BY food_id
+       ORDER BY last_used DESC
+       LIMIT ?
+     ) recent ON recent.food_id = f.id
+     ORDER BY recent.last_used DESC`,
+    [limit],
+  );
 }
 
 // ─── Writes ───────────────────────────────────────────────────────────────────
