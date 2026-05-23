@@ -75,7 +75,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Backdrop */}
         <TouchableWithoutFeedback onPress={onClose}>

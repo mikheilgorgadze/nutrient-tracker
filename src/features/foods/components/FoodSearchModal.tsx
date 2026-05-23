@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   StatusBar,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFoodSearch } from '../hooks/useFoodSearch';
@@ -47,6 +48,11 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
 
   function handleAdd(food: FoodRow, servings: number, slot: MealSlot) {
     addEntry.mutate({ food, servings, date: activeDate, mealSlot: slot });
+  }
+
+  function handleSelectFood(food: FoodRow) {
+    Keyboard.dismiss();
+    setSelectedFood(food);
   }
 
   function handleFoodCreated(food: Omit<FoodRow, 'created_at'>) {
@@ -127,7 +133,7 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
             data={results}
             keyExtractor={item => item.id}
             renderItem={({ item }) => (
-              <SearchResultItem food={item} onPress={setSelectedFood} />
+              <SearchResultItem food={item} onPress={handleSelectFood} />
             )}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.listContent}

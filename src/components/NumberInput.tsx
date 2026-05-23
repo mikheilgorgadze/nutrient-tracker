@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TextInput, View, Text, StyleSheet, TextInputProps } from 'react-native';
+import { TextInput, View, Text, StyleSheet, TextInputProps, Keyboard } from 'react-native';
 import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 interface NumberInputProps extends Omit<TextInputProps, 'onChangeText' | 'value' | 'keyboardType'> {
@@ -75,6 +75,8 @@ export function NumberInput({
         onChangeText={handleChange}
         onBlur={handleBlur}
         keyboardType="decimal-pad"
+        returnKeyType="done"
+        onSubmitEditing={Keyboard.dismiss}
         placeholderTextColor={colors.textTertiary}
         selectionColor={colors.accent}
         {...props}

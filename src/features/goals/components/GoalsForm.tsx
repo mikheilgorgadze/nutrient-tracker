@@ -4,6 +4,8 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { NumberInput } from '@/components/NumberInput';
@@ -69,7 +71,15 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+    <ScrollView
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+    >
       {/* Sex */}
       <FieldGroup label="Sex">
         <SegmentPicker
@@ -173,6 +183,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
         <Text style={styles.submitBtnText}>{submitLabel}</Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -214,6 +225,9 @@ function SegmentPicker({
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xxl,
