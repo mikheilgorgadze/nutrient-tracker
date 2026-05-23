@@ -1,5 +1,11 @@
 // @testing-library/react-native v12.4+ includes Jest matchers built-in (no separate import needed)
 
+// Pin all components to dark theme in tests so color assertions are deterministic.
+// Tests should not care about theme switching — that's a visual concern, not a behaviour concern.
+jest.mock('@/hooks/useColors', () => ({
+  useColors: () => require('@/lib/theme/tokens').darkColors,
+}));
+
 // Silence Reanimated warnings in test environment
 jest.mock('react-native-reanimated', () =>
   require('react-native-reanimated/mock')

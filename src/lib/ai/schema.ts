@@ -1,5 +1,13 @@
-// Placeholder — full implementation in Phase 7
-// Defined here so test mocks can import the type in Phase 0.
+export interface LabelEstimate {
+  name: string;
+  brand: string | null;
+  serving_label: string;
+  serving_size_g: number;
+  kcal_per_serving: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
 
 export interface FoodEstimate {
   name: string;

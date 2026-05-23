@@ -12,7 +12,8 @@ import * as Haptics from 'expo-haptics';
 import { NumberInput } from '@/components/NumberInput';
 import { MacroBadge } from '@/components/MacroBadge';
 import { macrosForServings } from '@/lib/algorithms/macros';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { DiaryEntryWithFood, MealSlot } from '@/lib/db/types';
 
 const MEAL_SLOTS: { value: MealSlot; label: string }[] = [
@@ -33,6 +34,8 @@ interface EditEntrySheetProps {
 }
 
 export function EditEntrySheet({ entry, onClose, onUpdate, onDelete, onCopyToToday }: EditEntrySheetProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [servings, setServings] = useState(1);
   const [mealSlot, setMealSlot] = useState<MealSlot>('breakfast');
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -156,7 +159,7 @@ export function EditEntrySheet({ entry, onClose, onUpdate, onDelete, onCopyToTod
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   backdrop: {
     backgroundColor: 'rgba(0,0,0,0.55)',
   },

@@ -3,13 +3,16 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getApiKey } from '@/lib/ai/client';
-import { colors, spacing, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, borderRadius } from '@/lib/theme/tokens';
 
 interface AddEntryFABProps {
   onPress: () => void;
 }
 
 export function AddEntryFAB({ onPress }: AddEntryFABProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const hasApiKey = Boolean(getApiKey());
 
   return (
@@ -36,7 +39,7 @@ export function AddEntryFAB({ onPress }: AddEntryFABProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   group: {
     position: 'absolute',
     right: spacing.lg,

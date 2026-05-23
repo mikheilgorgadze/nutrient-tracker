@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, TextProps, StyleSheet } from 'react-native';
-import { colors, fontSize, fontWeight } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { fontSize, fontWeight } from '@/lib/theme/tokens';
 
 interface TypographyProps extends TextProps {
   children?: React.ReactNode;
@@ -8,6 +9,8 @@ interface TypographyProps extends TextProps {
 }
 
 export function Heading({ style, tabular, ...props }: TypographyProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <Text
       style={[styles.heading, tabular && styles.tabular, style]}
@@ -17,6 +20,8 @@ export function Heading({ style, tabular, ...props }: TypographyProps) {
 }
 
 export function Body({ style, tabular, ...props }: TypographyProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <Text
       style={[styles.body, tabular && styles.tabular, style]}
@@ -26,6 +31,8 @@ export function Body({ style, tabular, ...props }: TypographyProps) {
 }
 
 export function Caption({ style, tabular, ...props }: TypographyProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <Text
       style={[styles.caption, tabular && styles.tabular, style]}
@@ -34,7 +41,7 @@ export function Caption({ style, tabular, ...props }: TypographyProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   heading: {
     color: colors.textPrimary,
     fontSize: fontSize.lg,

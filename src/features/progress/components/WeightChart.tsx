@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Polyline, Circle, Line, Text as SvgText } from 'react-native-svg';
-import { colors, spacing, fontSize, fontWeight } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight } from '@/lib/theme/tokens';
 
 interface WeightChartProps {
   dates: string[];
@@ -38,6 +39,8 @@ export function WeightChart({
   width = 320,
   height = 200,
 }: WeightChartProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [tooltipIdx, setTooltipIdx] = useState<number | null>(null);
 
   if (rawWeights.length === 0) {
@@ -172,7 +175,7 @@ export function WeightChart({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   empty: {
     alignItems: 'center',
     justifyContent: 'center',

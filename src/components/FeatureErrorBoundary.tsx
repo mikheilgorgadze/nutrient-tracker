@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 interface State {
   hasError: boolean;
@@ -12,6 +13,30 @@ interface Props {
   children: React.ReactNode;
   /** Shown in the error card heading */
   fallbackTitle?: string;
+}
+
+function ErrorFallback({ title, error, onReset }: { title: string; error: Error | null; onReset: () => void }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
+  return (
+    <View style={styles.container}>
+      <Ionicons name="warning-outline" size={40} color={colors.danger} />
+      <Text style={styles.title}>{title}</Text>
+      {error?.message ? (
+        <Text style={styles.detail} numberOfLines={3}>
+          {error.message}
+        </Text>
+      ) : null}
+      <TouchableOpacity
+        style={styles.retryBtn}
+        onPress={onReset}
+        accessibilityRole="button"
+        accessibilityLabel="Try again"
+      >
+        <Text style={styles.retryText}>Try again</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 export class FeatureErrorBoundary extends React.Component<Props, State> {
@@ -30,32 +55,18 @@ export class FeatureErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={styles.container}>
-          <Ionicons name="warning-outline" size={40} color={colors.danger} />
-          <Text style={styles.title}>
-            {this.props.fallbackTitle ?? 'Something went wrong'}
-          </Text>
-          {this.state.error?.message ? (
-            <Text style={styles.detail} numberOfLines={3}>
-              {this.state.error.message}
-            </Text>
-          ) : null}
-          <TouchableOpacity
-            style={styles.retryBtn}
-            onPress={this.reset}
-            accessibilityRole="button"
-            accessibilityLabel="Try again"
-          >
-            <Text style={styles.retryText}>Try again</Text>
-          </TouchableOpacity>
-        </View>
+        <ErrorFallback
+          title={this.props.fallbackTitle ?? 'Something went wrong'}
+          error={this.state.error}
+          onReset={this.reset}
+        />
       );
     }
     return this.props.children;
   }
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

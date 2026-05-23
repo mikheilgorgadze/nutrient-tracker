@@ -1,7 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow } from '@/lib/db/types';
 
 interface SearchResultItemProps {
@@ -10,6 +11,8 @@ interface SearchResultItemProps {
 }
 
 export function SearchResultItem({ food, onPress }: SearchResultItemProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <TouchableOpacity
       style={styles.row}
@@ -38,7 +41,7 @@ export function SearchResultItem({ food, onPress }: SearchResultItemProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

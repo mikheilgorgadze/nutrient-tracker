@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 interface CalorieBudgetBarProps {
   kcal: number;
@@ -14,6 +15,8 @@ function clamp(v: number, min: number, max: number) {
 }
 
 export function CalorieBudgetBar({ kcal, kcalTarget, showLabel = true }: CalorieBudgetBarProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const progress = kcalTarget > 0 ? clamp(kcal / kcalTarget, 0, 1) : 0;
   const pct = kcalTarget > 0 ? kcal / kcalTarget : 0;
 
@@ -45,7 +48,7 @@ export function CalorieBudgetBar({ kcal, kcalTarget, showLabel = true }: Calorie
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   container: {
     gap: spacing.xs,
   },

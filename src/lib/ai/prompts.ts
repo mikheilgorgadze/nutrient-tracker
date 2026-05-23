@@ -1,4 +1,28 @@
 /**
+ * Stable system prompt for nutrition label scanning.
+ * Reads exact values from a packaged food nutrition facts panel.
+ */
+export const NUTRITION_LABEL_SYSTEM_PROMPT = `You are an expert at reading nutrition facts labels from packaged foods.
+
+When given a photo of a nutrition facts label, respond ONLY with a JSON object (no markdown, no prose):
+{
+  "name": "product name visible on the package, or 'Unknown Food' if not visible",
+  "brand": "brand name if visible, otherwise null",
+  "serving_label": "serving size as written on label (e.g. '1 cup (240mL)', '28g (1 oz)')",
+  "serving_size_g": <number — serving size in grams; convert from mL/oz/cups as needed>,
+  "kcal_per_serving": <integer — calories per serving from the label>,
+  "protein_g": <number — protein grams per serving>,
+  "carbs_g": <number — total carbohydrates grams per serving>,
+  "fat_g": <number — total fat grams per serving>
+}
+
+Rules:
+- Read values EXACTLY as printed — do not estimate or adjust.
+- serving_size_g: if label says "240 mL", use 240 (1 mL water ≈ 1g). If oz, multiply by 28.35.
+- If the label is partially obscured, use the best visible values and still return valid JSON.
+- Return ONLY the JSON object. No other text.`;
+
+/**
  * Stable system prompt for food photo analysis.
  * Marked cache_control: ephemeral so Anthropic can cache it between requests.
  *

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   View,
@@ -10,10 +10,14 @@ import {
   Platform,
   StatusBar,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { NumberInput } from '@/components/NumberInput';
 import { useFoodMutations } from '../hooks/useFoodMutations';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useLabelScan } from '../hooks/useLabelScan';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow } from '@/lib/db/types';
 
 interface CreateFoodModalProps {
@@ -56,9 +60,12 @@ function validate(v: FormValues): string | null {
 }
 
 export function CreateFoodModal({ visible, initialName, onClose, onCreated }: CreateFoodModalProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [form, setForm] = useState<FormValues>(() => initialForm(initialName));
   const [error, setError] = useState<string | null>(null);
   const { createFood } = useFoodMutations();
+  const { state: scanState, scanLabel, reset: resetScan } = useLabelScan();
 
   // Re-initialize form when modal opens with a new initialName
   const [lastVisible, setLastVisible] = useState(false);
@@ -66,13 +73,37 @@ export function CreateFoodModal({ visible, initialName, onClose, onCreated }: Cr
     setLastVisible(true);
     setForm(initialForm(initialName));
     setError(null);
+    resetScan();
   } else if (!visible && lastVisible) {
     setLastVisible(false);
   }
 
+  // Pre-fill form when label scan completes
+  useEffect(() => {
+    if (scanState.status === 'done') {
+      const { label } = scanState;
+      setForm({
+        name: label.name,
+        brand: label.brand ?? '',
+        serving_label: label.serving_label,
+        serving_size_g: label.serving_size_g,
+        kcal_per_serving: label.kcal_per_serving,
+        protein_g: label.protein_g,
+        carbs_g: label.carbs_g,
+        fat_g: label.fat_g,
+      });
+      setError(null);
+    }
+    if (scanState.status === 'error') {
+      setError(`Scan failed: ${scanState.message}`);
+    }
+  }, [scanState]);
+
   function set<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setForm(f => ({ ...f, [key]: value }));
   }
+
+  const isScanning = scanState.status === 'picking' || scanState.status === 'scanning';
 
   function handleSave() {
     const validationError = validate(form);
@@ -130,6 +161,31 @@ export function CreateFoodModal({ visible, initialName, onClose, onCreated }: Cr
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Scan label banner */}
+        <TouchableOpacity
+          style={styles.scanBtn}
+          onPress={scanLabel}
+          disabled={isScanning}
+          accessibilityRole="button"
+          accessibilityLabel="Scan nutrition label"
+        >
+          {isScanning ? (
+            <ActivityIndicator size="small" color={colors.accent} />
+          ) : (
+            <Ionicons name="camera-outline" size={16} color={colors.accent} />
+          )}
+          <Text style={styles.scanBtnText}>
+            {scanState.status === 'done'
+              ? 'Label scanned — edit below'
+              : isScanning
+              ? scanState.status === 'picking' ? 'Selecting photo…' : 'Reading label…'
+              : 'Scan nutrition label'}
+          </Text>
+          {scanState.status === 'done' && (
+            <Ionicons name="checkmark-circle" size={16} color={colors.accent} />
+          )}
+        </TouchableOpacity>
 
         <ScrollView
           style={styles.scroll}
@@ -239,10 +295,14 @@ export function CreateFoodModal({ visible, initialName, onClose, onCreated }: Cr
 }
 
 function SectionLabel({ children }: { children: string }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return <Text style={styles.sectionLabel}>{children}</Text>;
 }
 
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -251,7 +311,7 @@ function FieldGroup({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -286,6 +346,22 @@ const styles = StyleSheet.create({
   },
   headerSaveDisabled: {
     opacity: 0.4,
+  },
+  scanBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  scanBtnText: {
+    flex: 1,
+    color: colors.accent,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
   },
   scroll: {
     flex: 1,

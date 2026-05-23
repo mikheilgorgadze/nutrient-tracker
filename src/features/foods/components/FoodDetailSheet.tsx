@@ -11,7 +11,8 @@ import {
 import { NumberInput } from '@/components/NumberInput';
 import { MacroBadge } from '@/components/MacroBadge';
 import { macrosForServings } from '@/lib/algorithms/macros';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow, MealSlot } from '@/lib/db/types';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -24,6 +25,8 @@ interface FoodDetailSheetProps {
 }
 
 export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSheetProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [servings, setServings] = useState(1);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -62,6 +65,21 @@ export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSh
 
           <View style={styles.servingRow}>
             <Text style={styles.label}>Servings</Text>
+            <View style={styles.quickServe}>
+              {[0.5, 1, 2].map(n => (
+                <TouchableOpacity
+                  key={n}
+                  style={[styles.quickBtn, Math.abs(servings - n) < 0.01 && styles.quickBtnActive]}
+                  onPress={() => setServings(n)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${n === 0.5 ? 'half' : n} serving${n !== 1 ? 's' : ''}`}
+                >
+                  <Text style={[styles.quickBtnText, Math.abs(servings - n) < 0.01 && styles.quickBtnTextActive]}>
+                    {n === 0.5 ? '½×' : `${n}×`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <NumberInput
               value={servings}
               onChangeValue={setServings}
@@ -76,10 +94,25 @@ export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSh
               <Text style={styles.kcalNum}>{Math.round(preview.kcal)}</Text>
               <Text style={styles.kcalUnit}>kcal</Text>
             </View>
-            <View style={styles.macroChips}>
-              <MacroBadge type="protein" value={preview.protein_g} />
-              <MacroBadge type="carbs" value={preview.carbs_g} />
-              <MacroBadge type="fat" value={preview.fat_g} />
+            <View style={styles.previewRight}>
+              <View style={styles.macroChips}>
+                <MacroBadge type="protein" value={preview.protein_g} />
+                <MacroBadge type="carbs" value={preview.carbs_g} />
+                <MacroBadge type="fat" value={preview.fat_g} />
+              </View>
+              {(food.fiber_g != null || food.sugar_g != null || food.sodium_mg != null) && (
+                <View style={styles.extraNutrients}>
+                  {food.fiber_g != null && (
+                    <Text style={styles.extraNutrientText}>Fiber {(food.fiber_g * servings).toFixed(1)}g</Text>
+                  )}
+                  {food.sugar_g != null && (
+                    <Text style={styles.extraNutrientText}>Sugar {(food.sugar_g * servings).toFixed(1)}g</Text>
+                  )}
+                  {food.sodium_mg != null && (
+                    <Text style={styles.extraNutrientText}>Sodium {Math.round(food.sodium_mg * servings)}mg</Text>
+                  )}
+                </View>
+              )}
             </View>
           </View>
 
@@ -102,7 +135,7 @@ export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSh
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   backdrop: {
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
@@ -173,11 +206,48 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.xs,
   },
-  macroChips: {
+  previewRight: {
     flex: 1,
+    gap: spacing.xs,
+  },
+  macroChips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
+  },
+  extraNutrients: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  extraNutrientText: {
+    color: colors.textTertiary,
+    fontSize: fontSize.xs,
+  },
+  quickServe: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  quickBtn: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  quickBtnActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  quickBtnText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+  },
+  quickBtnTextActive: {
+    color: colors.background,
   },
   addBtn: {
     backgroundColor: colors.accent,

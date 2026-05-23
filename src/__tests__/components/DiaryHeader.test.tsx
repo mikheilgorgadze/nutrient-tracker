@@ -126,4 +126,48 @@ describe('DiaryHeader', () => {
     );
     expect(screen.queryByLabelText('Go to today')).toBeNull();
   });
+
+  // ── Calorie budget line ───────────────────────────────────────────────────────
+
+  it('shows "−500 kcal remaining" when under target', () => {
+    const totals: MacroTotals = { kcal: 1500, protein_g: 0, carbs_g: 0, fat_g: 0 };
+    const targets: MacroTargets = { kcal: 2000, protein_g: 150, carbs_g: 200, fat_g: 67 };
+    render(
+      <DiaryHeader
+        {...DEFAULT_PROPS}
+        date={todayString()}
+        totals={totals}
+        targets={targets}
+      />
+    );
+    expect(screen.getByText('−500 kcal remaining')).toBeTruthy();
+  });
+
+  it('shows "+200 kcal over" when over target', () => {
+    const totals: MacroTotals = { kcal: 2200, protein_g: 0, carbs_g: 0, fat_g: 0 };
+    const targets: MacroTargets = { kcal: 2000, protein_g: 150, carbs_g: 200, fat_g: 67 };
+    render(
+      <DiaryHeader
+        {...DEFAULT_PROPS}
+        date={todayString()}
+        totals={totals}
+        targets={targets}
+      />
+    );
+    expect(screen.getByText('+200 kcal over')).toBeTruthy();
+  });
+
+  it('shows "−0 kcal remaining" when exactly at target', () => {
+    const totals: MacroTotals = { kcal: 2000, protein_g: 0, carbs_g: 0, fat_g: 0 };
+    const targets: MacroTargets = { kcal: 2000, protein_g: 150, carbs_g: 200, fat_g: 67 };
+    render(
+      <DiaryHeader
+        {...DEFAULT_PROPS}
+        date={todayString()}
+        totals={totals}
+        targets={targets}
+      />
+    );
+    expect(screen.getByText('−0 kcal remaining')).toBeTruthy();
+  });
 });

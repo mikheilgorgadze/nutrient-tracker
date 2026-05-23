@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors, fontSize, fontWeight } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { fontSize, fontWeight } from '@/lib/theme/tokens';
 
 interface MacroRingProps {
   /** Calories consumed */
@@ -49,6 +50,8 @@ export function MacroRing({
   fatTarget_g,
   size = 140,
 }: MacroRingProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const cx = size / 2;
   const cy = size / 2;
 
@@ -143,7 +146,7 @@ export function MacroRing({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'center',

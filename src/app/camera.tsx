@@ -5,9 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { usePhotoAnalysis } from '@/features/camera/hooks/usePhotoAnalysis';
 import { EstimateReviewSheet } from '@/features/camera/components/EstimateReviewSheet';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 export default function CameraScreen() {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const { state, pickAndAnalyze, reset } = usePhotoAnalysis();
 
   const isAnalyzing = state.status === 'analyzing' || state.status === 'picking';
@@ -70,7 +73,7 @@ export default function CameraScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,

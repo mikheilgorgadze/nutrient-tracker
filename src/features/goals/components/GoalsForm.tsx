@@ -12,7 +12,8 @@ import { NumberInput } from '@/components/NumberInput';
 import { MacroBadge } from '@/components/MacroBadge';
 import { mifflinBMR, baselineTDEE } from '@/lib/algorithms/tdee';
 import { dailyTargets } from '@/lib/algorithms/targets';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { GoalsRow, ActivityLevel, GoalType } from '@/lib/db/types';
 
 type GoalsFormValues = Omit<GoalsRow, 'id' | 'created_at' | 'updated_at'>;
@@ -50,6 +51,8 @@ const DEFAULT_VALUES: GoalsFormValues = {
 };
 
 export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submitDisabled, submitSuccess }: GoalsFormProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [values, setValues] = useState<GoalsFormValues>(initialValues ?? DEFAULT_VALUES);
 
   function update<K extends keyof GoalsFormValues>(key: K, value: GoalsFormValues[K]) {
@@ -81,7 +84,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       automaticallyAdjustKeyboardInsets
     >
       {/* Sex */}
-      <FieldGroup label="Sex">
+      <FieldGroup label="Sex" colors={colors}>
         <SegmentPicker
           options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }]}
           selected={values.sex}
@@ -90,7 +93,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       </FieldGroup>
 
       {/* Age */}
-      <FieldGroup label="Age">
+      <FieldGroup label="Age" colors={colors}>
         <NumberInput
           value={values.age_years}
           onChangeValue={v => update('age_years', Math.round(v))}
@@ -101,7 +104,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       </FieldGroup>
 
       {/* Height */}
-      <FieldGroup label="Height">
+      <FieldGroup label="Height" colors={colors}>
         <NumberInput
           value={values.height_cm}
           onChangeValue={v => update('height_cm', Math.round(v))}
@@ -112,7 +115,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       </FieldGroup>
 
       {/* Weight */}
-      <FieldGroup label="Weight">
+      <FieldGroup label="Weight" colors={colors}>
         <NumberInput
           value={values.weight_kg}
           onChangeValue={v => update('weight_kg', v)}
@@ -123,7 +126,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       </FieldGroup>
 
       {/* Activity level */}
-      <FieldGroup label="Activity level">
+      <FieldGroup label="Activity level" colors={colors}>
         {ACTIVITY_OPTIONS.map(opt => (
           <TouchableOpacity
             key={opt.value}
@@ -142,7 +145,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
       </FieldGroup>
 
       {/* Goal type */}
-      <FieldGroup label="Goal">
+      <FieldGroup label="Goal" colors={colors}>
         <SegmentPicker
           options={GOAL_OPTIONS}
           selected={values.goal_type}
@@ -152,7 +155,7 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
 
       {/* Weekly rate — shown only for lose/gain */}
       {values.goal_type !== 'maintain' && (
-        <FieldGroup label={values.goal_type === 'lose' ? 'Weekly loss rate' : 'Weekly gain rate'}>
+        <FieldGroup label={values.goal_type === 'lose' ? 'Weekly loss rate' : 'Weekly gain rate'} colors={colors}>
           <NumberInput
             value={values.weekly_rate_kg}
             onChangeValue={v => update('weekly_rate_kg', v)}
@@ -187,7 +190,8 @@ export function GoalsForm({ initialValues, onSubmit, submitLabel = 'Save', submi
   );
 }
 
-function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldGroup({ label, children, colors }: { label: string; children: React.ReactNode; colors: ReturnType<typeof useColors> }) {
+  const styles = makeStyles(colors);
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -205,6 +209,8 @@ function SegmentPicker({
   selected: string;
   onSelect: (value: string) => void;
 }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.segmentRow}>
       {options.map(opt => (
@@ -224,7 +230,7 @@ function SegmentPicker({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   flex: {
     flex: 1,
   },

@@ -3,7 +3,8 @@ import { View, Text, Modal, TouchableOpacity, StyleSheet, ActivityIndicator } fr
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { useBarcodeLookup } from '../hooks/useBarcodeLookup';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow } from '@/lib/db/types';
 
 interface BarcodeScannerModalProps {
@@ -13,6 +14,8 @@ interface BarcodeScannerModalProps {
 }
 
 export function BarcodeScannerModal({ visible, onClose, onFound }: BarcodeScannerModalProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [permission, requestPermission] = useCameraPermissions();
   const { state, lookup, reset } = useBarcodeLookup();
   const scanLock = useRef(false);
@@ -110,7 +113,7 @@ const CORNER = 24;
 const BORDER = 3;
 const VF_SIZE = 240;
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#000',

@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { NumberInput } from '@/components/NumberInput';
 import { useFoodMutations } from '../hooks/useFoodMutations';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow } from '@/lib/db/types';
 
 interface EditFoodModalProps {
@@ -54,6 +55,8 @@ function validate(v: FormValues): string | null {
 }
 
 export function EditFoodModal({ food, onClose }: EditFoodModalProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [form, setForm] = useState<FormValues>(() =>
     food ? foodToForm(food) : foodToForm({
       id: '', name: '', brand: null, serving_label: '1 serving', serving_size_g: 100,
@@ -198,10 +201,14 @@ export function EditFoodModal({ food, onClose }: EditFoodModalProps) {
 }
 
 function SectionLabel({ children }: { children: string }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return <Text style={styles.sectionLabel}>{children}</Text>;
 }
 
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -210,7 +217,7 @@ function FieldGroup({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,

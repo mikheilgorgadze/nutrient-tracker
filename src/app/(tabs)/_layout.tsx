@@ -1,7 +1,8 @@
 import { Tabs, router } from 'expo-router';
 import { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, fontSize } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { fontSize } from '@/lib/theme/tokens';
 import { useDb } from '@/hooks/useDb';
 import { getGoals } from '@/lib/db/queries/goals';
 
@@ -26,6 +27,7 @@ function OnboardingGate() {
 }
 
 export default function TabLayout() {
+  const colors = useColors();
   return (
     <>
       <OnboardingGate />

@@ -1,4 +1,4 @@
-export const colors = {
+export const darkColors = {
   // Backgrounds
   background: '#0F0F0F',
   surface: '#1A1A1A',
@@ -11,15 +11,57 @@ export const colors = {
   textTertiary: '#555555',
 
   // Semantic
-  accent: '#4ADE80',   // on-track / positive
-  warning: '#FBBF24',  // approaching limit
-  danger: '#FB7185',   // over limit / negative
+  accent: '#4ADE80',
+  warning: '#FBBF24',
+  danger: '#FB7185',
 
   // Macros
   protein: '#60A5FA',
   carbs: '#FBBF24',
   fat: '#F97316',
 } as const;
+
+export const lightColors = {
+  // Backgrounds
+  background: '#FFFFFF',
+  surface: '#F5F5F5',
+  surfaceAlt: '#EBEBEB',
+  border: '#E0E0E0',
+
+  // Text
+  textPrimary: '#0F0F0F',
+  textSecondary: '#6B6B6B',
+  textTertiary: '#ABABAB',
+
+  // Semantic
+  accent: '#16A34A',
+  warning: '#D97706',
+  danger: '#E11D48',
+
+  // Macros
+  protein: '#2563EB',
+  carbs: '#D97706',
+  fat: '#EA580C',
+} as const;
+
+export type AppColors = {
+  background: string;
+  surface: string;
+  surfaceAlt: string;
+  border: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  accent: string;
+  warning: string;
+  danger: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+};
+
+/** Kept for backward compat — resolves to dark theme. Prefer useColors() in components. */
+export const colors = darkColors;
 
 export const spacing = {
   xs: 4,

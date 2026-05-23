@@ -13,6 +13,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useFoodSearch } from '../hooks/useFoodSearch';
 import { useRecentFoods } from '../hooks/useRecentFoods';
 import { SearchResultItem } from './SearchResultItem';
@@ -21,7 +22,8 @@ import { CreateFoodModal } from './CreateFoodModal';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
 import { useDiaryMutations } from '@/features/diary/hooks/useDiaryMutations';
 import { useDiaryStore } from '@/store/diaryStore';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { FoodRow, MealSlot } from '@/lib/db/types';
 
 interface FoodSearchModalProps {
@@ -32,6 +34,8 @@ interface FoodSearchModalProps {
 }
 
 export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearchModalProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [term, setTerm] = useState('');
   const [selectedFood, setSelectedFood] = useState<FoodRow | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -94,6 +98,14 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
             accessibilityLabel="Scan barcode"
           >
             <Ionicons name="barcode-outline" size={24} color={colors.accent} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/camera')}
+            style={styles.createBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Scan food photo"
+          >
+            <Ionicons name="camera-outline" size={24} color={colors.accent} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setCreateOpen(true)}
@@ -178,7 +190,7 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,

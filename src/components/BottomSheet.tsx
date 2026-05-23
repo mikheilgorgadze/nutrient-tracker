@@ -12,7 +12,8 @@ import {
   Platform,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { colors, spacing, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, borderRadius } from '@/lib/theme/tokens';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const DISMISS_THRESHOLD = 80;
@@ -26,6 +27,8 @@ interface BottomSheetProps {
 }
 
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
@@ -96,7 +99,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

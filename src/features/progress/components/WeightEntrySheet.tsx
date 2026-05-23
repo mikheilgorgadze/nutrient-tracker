@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { BottomSheet } from '@/components/BottomSheet';
 import { NumberInput } from '@/components/NumberInput';
 import { today } from '@/lib/db';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 interface WeightEntrySheetProps {
   visible: boolean;
@@ -18,6 +19,8 @@ export function WeightEntrySheet({
   onSave,
   initialWeight = 70,
 }: WeightEntrySheetProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [weight, setWeight] = useState(initialWeight);
 
   function handleSave() {
@@ -50,7 +53,7 @@ export function WeightEntrySheet({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xxl,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import type { TdeeData } from '../hooks/useTdeeEstimate';
 
 interface TdeeCardProps {
@@ -8,6 +9,8 @@ interface TdeeCardProps {
 }
 
 export function TdeeCard({ data }: TdeeCardProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const { estimatedTdee, confidence, latestRow } = data;
 
   const confidenceLabel = confidence === null
@@ -42,7 +45,7 @@ export function TdeeCard({ data }: TdeeCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,

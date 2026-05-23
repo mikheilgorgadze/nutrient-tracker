@@ -59,6 +59,74 @@ export function getDiaryKcalByDate(
   );
 }
 
+// ─── Log streak ───────────────────────────────────────────────────────────────
+
+/**
+ * Returns the number of consecutive days (ending today or yesterday) that
+ * have at least one diary entry.
+ *
+ * Algorithm: fetch all distinct logged dates ordered newest-first, then walk
+ * them in JS counting consecutive days back from today. The streak starts from
+ * today if there is an entry today, otherwise from yesterday. Breaks on the
+ * first gap.
+ *
+ * Returns 0 if the most recent entry is older than yesterday.
+ */
+export function getLogStreak(db: SQLiteDatabase): number {
+  const rows = db.getAllSync<{ date: string }>(
+    `SELECT DISTINCT date FROM diary_entries ORDER BY date DESC`,
+  );
+
+  if (rows.length === 0) return 0;
+
+  const now = new Date();
+  const todayStr = (() => {
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  })();
+
+  const yesterdayStr = (() => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  })();
+
+  const dateSet = new Set(rows.map(r => r.date));
+
+  // Streak must start today or yesterday
+  const hasToday = dateSet.has(todayStr);
+  const hasYesterday = dateSet.has(yesterdayStr);
+
+  if (!hasToday && !hasYesterday) return 0;
+
+  // Walk backwards from today (or yesterday if no entry today)
+  let streak = 0;
+  const startDate = new Date(now);
+  if (!hasToday) {
+    startDate.setDate(startDate.getDate() - 1);
+  }
+
+  const cursor = new Date(startDate);
+  while (true) {
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    if (!dateSet.has(dateStr)) break;
+
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
 // ─── TDEE history ─────────────────────────────────────────────────────────────
 
 export function getLatestTdeeEstimate(

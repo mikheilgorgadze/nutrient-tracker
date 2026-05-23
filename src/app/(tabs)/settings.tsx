@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { FeatureErrorBoundary } from '@/components/FeatureErrorBoundary';
 import { GoalsForm } from '@/features/goals/components/GoalsForm';
 import { useGoals } from '@/features/goals/hooks/useGoals';
@@ -12,9 +13,16 @@ import { useGoalsMutations } from '@/features/goals/hooks/useGoalsMutations';
 import { useDb } from '@/hooks/useDb';
 import { exportBackup } from '@/lib/backup/export';
 import { importBackup } from '@/lib/backup/import';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { RemindersSection } from '@/features/settings/components/RemindersSection';
+import { useColors } from '@/hooks/useColors';
+import { useThemeStore, ThemeMode } from '@/store/themeStore';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 export default function SettingsTab() {
+  const colors = useColors();
+  const styles = makeStyles(colors);
+  const { mode: themeMode, setMode: setThemeMode } = useThemeStore();
+  const version = Constants.expoConfig?.version ?? '1.0.0';
   const { goals, isLoading } = useGoals();
   const { saveGoals } = useGoalsMutations();
   const db = useDb();
@@ -119,13 +127,41 @@ export default function SettingsTab() {
               <Text style={styles.backupBtnText}>Import backup…</Text>
             </TouchableOpacity>
           </View>
+
+          <RemindersSection />
+
+          {/* Theme section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Appearance</Text>
+            <View style={styles.themeRow}>
+              {(['system', 'light', 'dark'] as ThemeMode[]).map(m => (
+                <TouchableOpacity
+                  key={m}
+                  style={[styles.themeBtn, themeMode === m && styles.themeBtnActive]}
+                  onPress={() => setThemeMode(m)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${m.charAt(0).toUpperCase() + m.slice(1)} theme`}
+                >
+                  <Text style={[styles.themeBtnText, themeMode === m && styles.themeBtnTextActive]}>
+                    {m.charAt(0).toUpperCase() + m.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* About section */}
+          <View style={styles.aboutSection}>
+            <Text style={styles.aboutText}>NutrientTracker v{version}</Text>
+            <Text style={styles.aboutSubtext}>Fully offline · All data stays on your device</Text>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </FeatureErrorBoundary>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -185,5 +221,44 @@ const styles = StyleSheet.create({
     color: colors.accent,
     fontSize: fontSize.base,
     fontWeight: fontWeight.medium,
+  },
+  aboutSection: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    gap: spacing.xs,
+  },
+  aboutText: {
+    color: colors.textTertiary,
+    fontSize: fontSize.sm,
+  },
+  aboutSubtext: {
+    color: colors.textTertiary,
+    fontSize: fontSize.xs,
+    opacity: 0.6,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  themeBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderRadius: borderRadius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  themeBtnActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  themeBtnText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+  },
+  themeBtnTextActive: {
+    color: colors.background,
   },
 });

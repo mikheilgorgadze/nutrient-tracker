@@ -27,6 +27,14 @@ const BREAD: FoodRow = {
   created_at: 0,
 };
 
+const BREAD_WITH_EXTRAS: FoodRow = {
+  ...BREAD,
+  id: 'food_bread_extras',
+  fiber_g: 2.5,
+  sugar_g: 1.2,
+  sodium_mg: 150,
+};
+
 describe('FoodDetailSheet', () => {
   it('renders nothing when food is null', () => {
     const { queryByRole } = render(
@@ -141,5 +149,97 @@ describe('FoodDetailSheet', () => {
     // accessibility: press the area labelled 'backdrop' if present, or skip.
     // The key assertion is that the Add button flow works correctly.
     expect(onClose).not.toHaveBeenCalled(); // not called before any interaction
+  });
+
+  // ── Feature 2: Quick serving buttons ──────────────────────────────────────────
+
+  it('renders three quick-serve buttons (½×, 1×, 2×)', () => {
+    const { getByLabelText } = render(
+      <FoodDetailSheet
+        food={BREAD}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    expect(getByLabelText('half servings')).toBeTruthy();
+    expect(getByLabelText('1 serving')).toBeTruthy();
+    expect(getByLabelText('2 servings')).toBeTruthy();
+  });
+
+  it('tapping ½× updates calorie display to ~40 kcal', () => {
+    const { getByLabelText, getByText } = render(
+      <FoodDetailSheet
+        food={BREAD}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    // Initially 79 kcal (1 serving)
+    expect(getByText('79')).toBeTruthy();
+    // Tap ½×
+    fireEvent.press(getByLabelText('half servings'));
+    // 79 * 0.5 = 39.5 → rounds to 40
+    expect(getByText('40')).toBeTruthy();
+  });
+
+  it('1× button is rendered (active by default at 1 serving)', () => {
+    const { getByLabelText } = render(
+      <FoodDetailSheet
+        food={BREAD}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    // 1× button exists with correct accessibility label
+    expect(getByLabelText('1 serving')).toBeTruthy();
+  });
+
+  // ── Feature 3: Extra nutrient row ─────────────────────────────────────────────
+
+  it('shows extra nutrients row when food has fiber, sugar, and sodium', () => {
+    const { getByText } = render(
+      <FoodDetailSheet
+        food={BREAD_WITH_EXTRAS}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    expect(getByText('Fiber 2.5g')).toBeTruthy();
+    expect(getByText('Sugar 1.2g')).toBeTruthy();
+    expect(getByText('Sodium 150mg')).toBeTruthy();
+  });
+
+  it('extra nutrient values scale with servings (2 servings → fiber 5.0g)', () => {
+    const { getByLabelText, getByText } = render(
+      <FoodDetailSheet
+        food={BREAD_WITH_EXTRAS}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    // Tap 2× button
+    fireEvent.press(getByLabelText('2 servings'));
+    expect(getByText('Fiber 5.0g')).toBeTruthy();
+    expect(getByText('Sugar 2.4g')).toBeTruthy();
+    expect(getByText('Sodium 300mg')).toBeTruthy();
+  });
+
+  it('extra nutrients row is absent when all extra fields are null', () => {
+    const { queryByText } = render(
+      <FoodDetailSheet
+        food={BREAD}
+        mealSlot="breakfast"
+        onClose={jest.fn()}
+        onAdd={jest.fn()}
+      />
+    );
+    expect(queryByText(/Fiber/)).toBeNull();
+    expect(queryByText(/Sugar/)).toBeNull();
+    expect(queryByText(/Sodium/)).toBeNull();
   });
 });

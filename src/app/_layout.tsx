@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-q
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useDb } from '@/hooks/useDb';
 import { initBundledFoods } from '@/lib/db';
@@ -11,7 +10,7 @@ import { getGoals } from '@/lib/db/queries/goals';
 import { mifflinBMR, baselineTDEE, adaptiveTDEE } from '@/lib/algorithms/tdee';
 import { toWeeklyAverages } from '@/lib/algorithms/trends';
 import { newId } from '@/lib/db';
-import { colors } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,36 +83,30 @@ function TdeeRecalculator() {
   return null;
 }
 
-export default function RootLayout() {
+function ThemedLayout() {
+  const colors = useColors();
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <QueryClientProvider client={queryClient}>
-        <StatusBar style="light" />
-        <TdeeRecalculator />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen
-            name="onboarding"
-            options={{ presentation: 'fullScreenModal' }}
-          />
-          <Stack.Screen
-            name="camera"
-            options={{ presentation: 'fullScreenModal' }}
-          />
-        </Stack>
-      </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={colors.background === '#FFFFFF' ? 'dark' : 'light'} />
+      <TdeeRecalculator />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="camera" options={{ presentation: 'fullScreenModal' }} />
+      </Stack>
     </GestureHandlerRootView>
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-});
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemedLayout />
+      </QueryClientProvider>
+  );
+}

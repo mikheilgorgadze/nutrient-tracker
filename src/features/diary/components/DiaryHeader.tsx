@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { MacroRing } from '@/components/MacroRing';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 import { today } from '@/lib/db';
 import type { MacroTotals } from '@/lib/db/types';
 import type { MacroTargets } from '@/lib/algorithms/targets';
@@ -32,6 +33,8 @@ function formatDate(dateStr: string): string {
 }
 
 export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoToToday, latestWeight }: DiaryHeaderProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const insets = useSafeAreaInsets();
   const isToday = date === today();
 
@@ -92,6 +95,16 @@ export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoT
         <MacroStat label="Fat"     value={totals.fat_g}     target={targets.fat_g}     color={colors.fat} />
       </View>
 
+      {/* Calorie budget line */}
+      {(() => {
+        const remaining = Math.round(targets.kcal - totals.kcal);
+        return (
+          <Text style={[styles.budgetText, remaining < 0 && styles.budgetOver]}>
+            {remaining >= 0 ? `−${remaining} kcal remaining` : `+${Math.abs(remaining)} kcal over`}
+          </Text>
+        );
+      })()}
+
       {latestWeight !== undefined && (
         <View style={styles.weightRow}>
           <Ionicons name="scale-outline" size={13} color={colors.textTertiary} />
@@ -105,6 +118,8 @@ export function DiaryHeader({ date, totals, targets, onPrevDay, onNextDay, onGoT
 function MacroStat({
   label, value, target, color,
 }: { label: string; value: number; target: number; color: string }) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.stat}>
       <Text style={[styles.statValue, { color }]}>{Math.round(value)}g</Text>
@@ -114,7 +129,7 @@ function MacroStat({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   container: {
     backgroundColor: colors.background,
     paddingBottom: spacing.md,
@@ -177,6 +192,15 @@ const styles = StyleSheet.create({
     color: colors.textTertiary,
     fontSize: fontSize.xs,
     fontVariant: ['tabular-nums'],
+  },
+  budgetText: {
+    color: colors.accent,
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+  },
+  budgetOver: {
+    color: colors.danger,
   },
   stat: {
     alignItems: 'center',

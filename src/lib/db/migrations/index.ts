@@ -109,9 +109,26 @@ ALTER TABLE foods ADD COLUMN barcode TEXT;
 CREATE INDEX IF NOT EXISTS idx_foods_barcode ON foods(barcode) WHERE barcode IS NOT NULL;
 ` as const;
 
+export const MIGRATION_005 = `
+CREATE TABLE IF NOT EXISTS meal_templates (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
+);
+
+CREATE TABLE IF NOT EXISTS meal_template_items (
+  id TEXT PRIMARY KEY,
+  template_id TEXT NOT NULL REFERENCES meal_templates(id) ON DELETE CASCADE,
+  food_id TEXT NOT NULL REFERENCES foods(id) ON DELETE CASCADE,
+  servings REAL NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)
+);
+` as const;
+
 export const MIGRATIONS: Array<{ filename: string; sql: string }> = [
   { filename: '001_initial.sql',     sql: MIGRATION_001 },
   { filename: '002_core_schema.sql', sql: MIGRATION_002 },
   { filename: '003_foods_fts.sql',   sql: MIGRATION_003 },
   { filename: '004_barcode.sql',     sql: MIGRATION_004 },
+  { filename: '005_templates.sql',   sql: MIGRATION_005 },
 ];

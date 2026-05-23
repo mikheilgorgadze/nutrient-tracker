@@ -4,33 +4,78 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { WeightChart } from '../components/WeightChart';
 import { TdeeCard } from '../components/TdeeCard';
+import { CalorieChart } from '../components/CalorieChart';
 import { WeightEntrySheet } from '../components/WeightEntrySheet';
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useTdeeEstimate } from '../hooks/useTdeeEstimate';
 import { useWeightMutations } from '../hooks/useWeightMutations';
+import { useCalorieHistory, avgKcalExcludingZero } from '../hooks/useCalorieHistory';
+import { useStreak } from '../hooks/useStreak';
 import { today } from '@/lib/db';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { mifflinBMR, baselineTDEE } from '@/lib/algorithms/tdee';
+import { dailyTargets } from '@/lib/algorithms/targets';
+import { useDb } from '@/hooks/useDb';
+import { getGoals } from '@/lib/db/queries/goals';
 
 const WINDOW_OPTIONS = [30, 90, 180] as const;
 type WindowDays = typeof WINDOW_OPTIONS[number];
 
+const DEFAULT_KCAL_TARGET = 2000;
+
 export function ProgressScreen() {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [windowDays, setWindowDays] = useState<WindowDays>(90);
   const [entrySheetOpen, setEntrySheetOpen] = useState(false);
 
+  const db = useDb();
   const { data: weightData, isLoading: weightLoading } = useWeightLog(windowDays);
   const { data: tdeeData, isLoading: tdeeLoading } = useTdeeEstimate();
   const { logWeight } = useWeightMutations();
+  const { data: calorieHistory } = useCalorieHistory(7);
+  const streak = useStreak();
 
   const isLoading = weightLoading || tdeeLoading;
   const loggedToday = weightData?.dates.includes(today()) ?? false;
+
+  // Derive calorie target the same way useDiary does
+  const kcalTarget = React.useMemo((): number => {
+    if (!db) return DEFAULT_KCAL_TARGET;
+    try {
+      const goals = getGoals(db);
+      if (!goals) return DEFAULT_KCAL_TARGET;
+      const bmr = mifflinBMR({
+        sex: goals.sex,
+        age: goals.age_years,
+        height_cm: goals.height_cm,
+        weight_kg: goals.weight_kg,
+      });
+      const tdee = tdeeData?.estimatedTdee ?? baselineTDEE(bmr, goals.activity_level);
+      return dailyTargets(
+        tdee,
+        { goalType: goals.goal_type, weeklyRateKg: goals.weekly_rate_kg },
+        goals.weight_kg,
+      ).kcal;
+    } catch {
+      return DEFAULT_KCAL_TARGET;
+    }
+  }, [db, tdeeData]);
+
+  const sevenDayAvg = avgKcalExcludingZero(calorieHistory);
 
   return (
     <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <Text style={styles.headerTitle}>Progress</Text>
+        {streak > 0 && (
+          <View style={styles.streakBadge} accessibilityLabel={`${streak} day streak`}>
+            <Text style={styles.streakText}>{'🔥'} {streak}d</Text>
+          </View>
+        )}
         <TouchableOpacity
           style={[styles.logWeightBtn, loggedToday && styles.logWeightBtnLogged]}
           onPress={() => setEntrySheetOpen(true)}
@@ -62,6 +107,24 @@ export function ProgressScreen() {
             )}
           </>
         ) : null}
+
+        {/* Calorie bar chart */}
+        {calorieHistory.length > 0 && (
+          <View>
+            <CalorieChart
+              dates={calorieHistory.map(e => e.date)}
+              kcals={calorieHistory.map(e => e.kcal)}
+              target={kcalTarget}
+              width={width - spacing.md * 2}
+              height={180}
+            />
+            {sevenDayAvg > 0 && (
+              <Text style={styles.avgKcalText}>
+                {'7-day avg  ·  '}{sevenDayAvg.toLocaleString()}{' kcal'}
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* Section header */}
         <View style={styles.sectionHeader}>
@@ -118,7 +181,7 @@ export function ProgressScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
@@ -224,5 +287,21 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
     paddingVertical: spacing.sm,
+  },
+  avgKcalText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+  },
+  streakBadge: {
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  streakText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.xs,
   },
 });

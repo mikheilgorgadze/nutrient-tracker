@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TextInput, View, Text, StyleSheet, TextInputProps, Keyboard } from 'react-native';
-import { colors, spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight, borderRadius } from '@/lib/theme/tokens';
 
 interface NumberInputProps extends Omit<TextInputProps, 'onChangeText' | 'value' | 'keyboardType'> {
   value: number;
@@ -23,6 +24,8 @@ export function NumberInput({
   style,
   ...props
 }: NumberInputProps) {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [text, setText] = useState(String(value));
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -86,7 +89,7 @@ export function NumberInput({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

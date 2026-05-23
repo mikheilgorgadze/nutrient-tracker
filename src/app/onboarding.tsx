@@ -5,11 +5,14 @@ import { router } from 'expo-router';
 import { IntroSlides } from '@/features/onboarding/components/IntroSlides';
 import { GoalsForm } from '@/features/goals/components/GoalsForm';
 import { useGoalsMutations } from '@/features/goals/hooks/useGoalsMutations';
-import { colors, spacing, fontSize, fontWeight } from '@/lib/theme/tokens';
+import { useColors } from '@/hooks/useColors';
+import { spacing, fontSize, fontWeight } from '@/lib/theme/tokens';
 
 type Phase = 'intro' | 'goals';
 
 export default function OnboardingScreen() {
+  const colors = useColors();
+  const styles = makeStyles(colors);
   const [phase, setPhase] = useState<Phase>('intro');
   const { saveGoals } = useGoalsMutations();
 
@@ -38,7 +41,7 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.background,
