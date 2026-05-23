@@ -9,7 +9,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as SQLite from 'expo-sqlite';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const MIGRATION_KEY = 'bundled_foods_v1';
+const MIGRATION_KEY = 'bundled_foods_v2';
 
 // Metro registers binary assets as numeric module IDs.
 // The require() is resolved at build time; if the file doesn't exist
