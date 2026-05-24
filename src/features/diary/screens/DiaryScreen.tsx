@@ -249,8 +249,9 @@ const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    opacity: 0,
-    zIndex: -1,
+    // transform keeps the view in the GPU compositing pipeline on Android;
+    // opacity:0 or large negative positions cause captureRef to return a blank image
+    transform: [{ translateX: 5000 }],
   },
   emptyState: {
     alignItems: 'center',

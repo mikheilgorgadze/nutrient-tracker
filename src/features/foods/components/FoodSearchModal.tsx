@@ -6,6 +6,7 @@ import {
   FlatList,
   Text,
   TouchableOpacity,
+  KeyboardAvoidingView,
   StyleSheet,
   ActivityIndicator,
   StatusBar,
@@ -72,7 +73,10 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View style={styles.root}>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
         {/* Search bar */}
         <View style={styles.searchBar}>
           <View style={styles.inputWrapper}>
@@ -172,7 +176,7 @@ export function FoodSearchModal({ visible, onClose, initialMealSlot }: FoodSearc
         onClose={() => setSelectedFood(null)}
         onAdd={handleAdd}
       />
-      </View>
+      </KeyboardAvoidingView>
 
       <CreateFoodModal
         visible={createOpen}

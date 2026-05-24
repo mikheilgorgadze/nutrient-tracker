@@ -11,7 +11,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bump": "node scripts/bump-version.mjs",
+    "build": "npm run bump && eas build --platform android --profile preview"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",

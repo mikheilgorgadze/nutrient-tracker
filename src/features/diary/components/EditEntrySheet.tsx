@@ -4,8 +4,10 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
   Animated,
   Dimensions,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -63,6 +65,10 @@ export function EditEntrySheet({ entry, onClose, onUpdate, onDelete, onCopyToTod
         <View style={[StyleSheet.absoluteFill, styles.backdrop]} />
       </TouchableWithoutFeedback>
 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoiding}
+      >
       <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
         <View style={styles.handleArea}>
           <View style={styles.handle} />
@@ -155,19 +161,22 @@ export function EditEntrySheet({ entry, onClose, onUpdate, onDelete, onCopyToTod
           </TouchableOpacity>
         </View>
       </Animated.View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  sheet: {
+  keyboardAvoiding: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  sheet: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,

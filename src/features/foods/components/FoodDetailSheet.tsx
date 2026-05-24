@@ -4,8 +4,10 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
   Animated,
   Dimensions,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { NumberInput } from '@/components/NumberInput';
@@ -54,6 +56,10 @@ export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSh
       </TouchableWithoutFeedback>
 
       {/* Sliding panel — anchored to the bottom */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoiding}
+      >
       <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
         <View style={styles.handleArea}>
           <View style={styles.handle} />
@@ -131,6 +137,7 @@ export function FoodDetailSheet({ food, mealSlot, onClose, onAdd }: FoodDetailSh
           </TouchableOpacity>
         </View>
       </Animated.View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -139,11 +146,13 @@ const makeStyles = (colors: ReturnType<typeof useColors>) => StyleSheet.create({
   backdrop: {
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
-  sheet: {
+  keyboardAvoiding: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  sheet: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
